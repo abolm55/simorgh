@@ -68,13 +68,16 @@ func TestSystemTextIsTrimmed(t *testing.T) {
 func TestSupportTextFormat(t *testing.T) {
 	got := supportText(LangEN)
 	for _, want := range []string{
-		"GitHub : ", "Channel : ",
-		"🔺 Tron [ TRX ] :",
-		"💠 USDT [ BEP20 ] :",
-		"💎 Gram [ TON ] :",
+		"GitHub : https://github.com/abolm55/simorgh",
 	} {
 		if !strings.Contains(got, want) {
 			t.Errorf("support text is missing %q:\n%s", want, got)
+		}
+	}
+	// The upstream author's channel and donation wallets were removed.
+	for _, unwanted := range []string{"Channel : ", "Tron", "USDT", "Gram", "BlackProtocols", "AminMGMT"} {
+		if strings.Contains(got, unwanted) {
+			t.Errorf("support text still carries %q, which was deliberately removed:\n%s", unwanted, got)
 		}
 	}
 }
