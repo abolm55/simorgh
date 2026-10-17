@@ -8,10 +8,17 @@ import (
 // The panel's transport menu and the CLI's are one list. If they ever became
 // two, a transport would exist in the terminal and not in the browser — which
 // is exactly the drift this whole file exists to prevent.
+//
+// The managed HTTPS transports (naive, xhttp, reality) are the deliberate
+// exception: the CLI lists them in a separate HTTPS family, and the panel now
+// does too, since the setup form collects their credentials (see
+// webmanaged.go). They are checked against managedTransport rather than
+// validTransport, because their carrier is plain TCP wrapped by a helper.
 func TestTransportMenuIsTheCLIMenu(t *testing.T) {
 	families := TransportFamilies()
-	if len(families) != len(transportGroups) {
-		t.Fatalf("panel shows %d families, the CLI menu has %d", len(families), len(transportGroups))
+	if len(families) != len(transportGroups)+1 {
+		t.Fatalf("panel shows %d families, the CLI menu has %d plus the managed HTTPS one",
+			len(families), len(transportGroups))
 	}
 	for i, g := range transportGroups {
 		f := families[i]
@@ -36,6 +43,21 @@ func TestTransportMenuIsTheCLIMenu(t *testing.T) {
 		if strings.Join(got, ",") != strings.Join(want, ",") {
 			t.Errorf("family %q: panel offers %v, the menu offers %v", f.Label, got, want)
 		}
+	}
+	// The managed HTTPS family the panel adds beyond the CLI's transport groups.
+	mg := families[len(families)-1]
+	if mg.Label != "HTTPS" {
+		t.Errorf("last family is %q, want the managed HTTPS one", mg.Label)
+	}
+	var mgGot []string
+	for _, e := range mg.Entries {
+		mgGot = append(mgGot, e.Value)
+		if !managedTransport(e.Value) {
+			t.Errorf("the panel's HTTPS family offers %q, which is not a managed transport", e.Value)
+		}
+	}
+	if strings.Join(mgGot, ",") != "naive,xhttp,reality" {
+		t.Errorf("HTTPS family offers %v, want naive,xhttp,reality", mgGot)
 	}
 }
 
