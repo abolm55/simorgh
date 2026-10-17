@@ -746,11 +746,7 @@ func webUIText(lang string) string {
 
 func supportText(lang string) string {
 	return b("💛 "+tr(lang, "Support")) + "\n\n" +
-		"GitHub : https://github.com/AminMGMT\n" +
-		"Channel : https://t.me/BlackProtocols\n\n" +
-		"🔺 Tron [ TRX ] :\n" + code("TTzuUAtsEsrLgNpFVLNTyLVJVRRFNWESYc") + "\n\n" +
-		"💠 USDT [ BEP20 ] :\n" + code("0xc112AE9bfF7c59dEcFb34E988A397848D3093E82") + "\n\n" +
-		"💎 Gram [ TON ] :\n" + code("UQD9g40QubAICJ6zPqegtCY7s-joMx2DB8aIqA0xF1aHoCDs")
+		"GitHub : https://github.com/abolm55/simorgh"
 }
 
 func sleepCtx(ctx context.Context, d time.Duration) {

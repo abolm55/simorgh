@@ -29,7 +29,7 @@ function links(root, close) {
   root.querySelectorAll('button').forEach(b => {
     const t = b.textContent.trim().toLowerCase();
     if (t.includes('github')) b.addEventListener('click', () => open('https://github.com/abolm55/simorgh'));
-    else if (t.includes('telegram')) b.addEventListener('click', () => open('https://t.me/BlackProtocols'));
+    else if (t.includes('telegram')) b.addEventListener('click', close);
     else if (t === 'later') b.addEventListener('click', close);
     else if (t === 'do not ask again') b.addEventListener('click', () => {
       try { localStorage.setItem('bp_star', 'never'); } catch (e) {}
