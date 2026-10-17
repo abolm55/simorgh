@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/abolm55/simorgh/config"
+	"github.com/abolm55/simorgh/internal/manage/host"
 )
 
 // managedWebFixture builds a NewTunnel form for a managed transport with a
@@ -247,6 +248,10 @@ func TestWebManagedRealityClientRoundTrip(t *testing.T) {
 // The generated certificate path is cleaned up with the test.
 func TestWebManagedCertAutoGenerate(t *testing.T) {
 	requireLinux(t)
+	// Use a temp dir for certs instead of /etc/simorgh (no root in CI).
+	old := host.CertDir
+	host.CertDir = t.TempDir()
+	t.Cleanup(func() { host.CertDir = old })
 	n := managedWebFixture(t, "server", "naive")
 	n.Managed.Certificate, n.Managed.Key = "", ""
 	s, err := specFromNew(n)

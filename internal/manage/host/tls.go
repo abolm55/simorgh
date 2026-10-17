@@ -17,8 +17,9 @@ import (
 	"github.com/abolm55/simorgh/internal/app"
 )
 
-// certDir is where auto-generated self-signed certificates live.
-const certDir = app.ConfigDir + "/certs"
+// CertDir is where auto-generated self-signed certificates live.
+// It is a var (not const) so tests can redirect it to a temp dir.
+var CertDir = app.ConfigDir + "/certs"
 
 // EnsureSelfSignedCert generates (or reuses) a self-signed certificate/key pair
 // for a tunnel, used by the wss/wssmux transports. host may be a domain or IP
@@ -26,8 +27,8 @@ const certDir = app.ConfigDir + "/certs"
 // (InsecureSkipVerify) — encryption works regardless of the name on the cert.
 // It returns the on-disk cert and key paths.
 func EnsureSelfSignedCert(name, host string) (certPath, keyPath string, err error) {
-	certPath = certDir + "/" + name + ".crt"
-	keyPath = certDir + "/" + name + ".key"
+	certPath = CertDir + "/" + name + ".crt"
+	keyPath = CertDir + "/" + name + ".key"
 	if fileExists(certPath) && fileExists(keyPath) {
 		return certPath, keyPath, nil
 	}
@@ -48,9 +49,9 @@ func EnsureSelfSignedCert(name, host string) (certPath, keyPath string, err erro
 // existing pair. It is the one place the certificate template lives, shared by
 // the tunnel certificates and the web panel's.
 func writeSelfSigned(name string, ips []net.IP, dns []string) (certPath, keyPath string, err error) {
-	certPath = certDir + "/" + name + ".crt"
-	keyPath = certDir + "/" + name + ".key"
-	if err = os.MkdirAll(certDir, 0755); err != nil {
+	certPath = CertDir + "/" + name + ".crt"
+	keyPath = CertDir + "/" + name + ".key"
+	if err = os.MkdirAll(CertDir, 0755); err != nil {
 		return "", "", err
 	}
 
@@ -151,8 +152,8 @@ func localSANs(host string) (ips []net.IP, dns []string) {
 // does not — so an address that changed, or a first certificate that captured
 // only a useless "-", is corrected rather than served to every browser forever.
 func EnsurePanelCert(host string) (certPath, keyPath string, err error) {
-	certPath = certDir + "/webui.crt"
-	keyPath = certDir + "/webui.key"
+	certPath = CertDir + "/webui.crt"
+	keyPath = CertDir + "/webui.key"
 	ips, dns := localSANs(host)
 	if fileExists(certPath) && fileExists(keyPath) && certCoversSANs(certPath, ips, dns) {
 		return certPath, keyPath, nil

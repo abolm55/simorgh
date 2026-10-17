@@ -27,6 +27,19 @@ import (
 	"testing"
 )
 
+// requireWritableConfigDir skips the test when /etc/simorgh is not writable
+// (e.g. CI runners without root). The tunnel spec tests write real config
+// files, so they need the real config dir.
+func requireWritableConfigDir(t *testing.T) {
+	t.Helper()
+	f, err := os.CreateTemp(app.ConfigDir, ".writetest-*")
+	if err != nil {
+		t.Skipf("config dir %s not writable: %v", app.ConfigDir, err)
+	}
+	f.Close()
+	os.Remove(f.Name())
+}
+
 // The clamp only reaches the config file when it is set, so a tunnel that never
 // had one does not grow an `mss = 0` line.
 func TestClampIsWrittenOnlyWhenSet(t *testing.T) {
@@ -46,6 +59,7 @@ func TestClampIsWrittenOnlyWhenSet(t *testing.T) {
 // Ordinary edits must keep the helper that carries the reverse connection,
 // including credentials and certificate paths that generic JSON cannot expose.
 func TestNaiveLoadEditRoundTrip(t *testing.T) {
+	requireWritableConfigDir(t)
 	binary, certificate, key := naiveSpecFiles(t)
 	for _, role := range []string{"server", "client"} {
 		t.Run(role, func(t *testing.T) {
@@ -117,6 +131,7 @@ func TestNaiveLoadEditRoundTrip(t *testing.T) {
 // Refuse edits that would bypass or misdirect the helper before Save writes a
 // tunnel config or invokes systemd. Both role-specific validators are exercised.
 func TestNaiveIncompatibleEditPreservesExistingConfig(t *testing.T) {
+	requireWritableConfigDir(t)
 	binary, certificate, key := naiveSpecFiles(t)
 	if err := os.MkdirAll(app.ConfigDir, 0755); err != nil {
 		t.Fatal(err)
@@ -187,6 +202,7 @@ func TestNaiveIncompatibleEditPreservesExistingConfig(t *testing.T) {
 }
 
 func TestXrayLoadEditPreservesSettingsAndRejectsBypass(t *testing.T) {
+	requireWritableConfigDir(t)
 	binary, certificate, key := naiveSpecFiles(t)
 	private, err := ecdh.X25519().GenerateKey(rand.Reader)
 	if err != nil {
